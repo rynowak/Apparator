@@ -3,9 +3,35 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
 VisualStudioVersion = 15.0.27004.2006
 MinimumVisualStudioVersion = 10.0.40219.1
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "samples", "samples", "{6DB5C5B1-9511-4544-A19D-9ABE76438F6F}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{1AA96BDF-4B01-45FA-B8C5-66790A867B16}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Apparator.Core", "src\Apparator.Core\Apparator.Core.csproj", "{D401D3B2-887F-4DF1-B564-D84640BFF724}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TestApp", "samples\TestApp\TestApp.csproj", "{208C69BF-C955-4697-924A-883CFBD1843D}"
+EndProject
 Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{D401D3B2-887F-4DF1-B564-D84640BFF724}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D401D3B2-887F-4DF1-B564-D84640BFF724}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D401D3B2-887F-4DF1-B564-D84640BFF724}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D401D3B2-887F-4DF1-B564-D84640BFF724}.Release|Any CPU.Build.0 = Release|Any CPU
+		{208C69BF-C955-4697-924A-883CFBD1843D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{208C69BF-C955-4697-924A-883CFBD1843D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{208C69BF-C955-4697-924A-883CFBD1843D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{208C69BF-C955-4697-924A-883CFBD1843D}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{D401D3B2-887F-4DF1-B564-D84640BFF724} = {1AA96BDF-4B01-45FA-B8C5-66790A867B16}
+		{208C69BF-C955-4697-924A-883CFBD1843D} = {6DB5C5B1-9511-4544-A19D-9ABE76438F6F}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {D00852D0-43D8-46D2-8DED-C194995A987A}
