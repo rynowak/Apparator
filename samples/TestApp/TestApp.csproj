@@ -2,6 +2,7 @@
 
   <PropertyGroup>
     <TargetFramework>netcoreapp2.0</TargetFramework>
+    <_MvcViewCompilationBinaryPath>C:\Users\rynowak\.nuget\packages\microsoft.aspnetcore.mvc.razor.viewcompilation\2.0.0\build\netstandard2.0\Microsoft.AspNetCore.Mvc.Razor.ViewCompilation.dll</_MvcViewCompilationBinaryPath>
   </PropertyGroup>
 
   <ItemGroup>
@@ -13,10 +14,12 @@
     <DotNetCliToolReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Tools" Version="2.0.0" />
   </ItemGroup>
 
-  <Target Name="DoTheNeedful" AfterTargets="Build">
-    <HelloWorld Name=", World!" />
+  <Target Name="DoTheNeedful" DependsOnTargets="_ResolveInputArguments;_CreateResponseFileForMvcRazorPrecompile">
+
+    <Apparate Debug="$(Debug)" DepsFile="$(ProjectDepsFilePath)" EntryAssembly="Microsoft.AspNetCore.Mvc.Razor.ViewCompilation" EntryAssemblyPath="$(_MvcViewCompilationBinaryPath)" EntryPointType="Microsoft.AspNetCore.Mvc.Razor.ViewCompilation.Program" EntryPointMethod="Main" Args="$(MSBuildProjectDirectory)\$(_MvcRazorResponseFilePath)" />
 
     <Message Importance="High" Text="Did the needful" />
   </Target>
 
 </Project>
+

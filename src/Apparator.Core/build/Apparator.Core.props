@@ -5,5 +5,5 @@
     <TaskAssembly>$(MSBuildThisFileDirectory)..\tasks\$(TaskFolder)\Apparator.Core.dll</TaskAssembly>
   </PropertyGroup>
 
-  <UsingTask TaskName="Apparator.Core.HelloWorld" AssemblyFile="$(TaskAssembly)" />
+  <UsingTask TaskName="Apparator.Core.Apparate" AssemblyFile="$(TaskAssembly)" />
 </Project>
