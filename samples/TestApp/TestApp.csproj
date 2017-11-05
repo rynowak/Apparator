@@ -14,18 +14,33 @@
     <DotNetCliToolReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Tools" Version="2.0.0" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Individuals Include="David Fowler" />
+    <Individuals Include="Ryan Nowak" />
+    <Individuals Include="Kanye">
+      <VoiceOfAGeneration>true</VoiceOfAGeneration>
+    </Individuals>
+    <Individuals Include="Pranav" />
+  </ItemGroup>
+
   <Target Name="TestApparator">
     <Message Importance="High" Text="Apparator Loaded" Condition="'$(Apparator)'=='true'" />
   </Target>
 
-  <Target Name="DoTheNeedful" DependsOnTargets="_ResolveInputArguments;_CreateResponseFileForMvcRazorPrecompile">
-    <Message Importance="High" Text="Apparator Loaded" Condition="'$(Apparator)'=='true'" />
-    
+  <Target Name="DoTheNeedful" DependsOnTargets="_ResolveInputArguments;_CreateResponseFileForMvcRazorPrecompile;TestApparator">
+
+    <Message Importance="High" Text="Running Echo Task" />
     <Echo Message="Heyyyyyyyyyy">
       <Output TaskParameter="Response" PropertyName="EchoReply" />
     </Echo>
-
     <Message Importance="High" Text="Got response $(EchoReply)" />
+
+    <Message Importance="High" Text="Running SayHello Task" />
+    <SayHello Message="Hey there {0}, how are things?" Individuals="@(Individuals)">
+      <Output TaskParameter="Responses" ItemName="EchoReply" />
+    </SayHello>
+    <Message Importance="High" Text="Got response '%(EchoReply.Identity)' for a genius." Condition="'%(EchoReply.VoiceOfAGeneration)'=='true'" />
+    <Message Importance="High" Text="Got response '%(EchoReply.Identity)' for some regular guy." Condition="'%(EchoReply.VoiceOfAGeneration)'!='true'" />
   </Target>
 
 </Project>

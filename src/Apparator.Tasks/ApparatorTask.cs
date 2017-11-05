@@ -3,11 +3,13 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO.Pipes;
 using System.Linq;
+using System.Runtime.Serialization;
 using System.Runtime.Serialization.Formatters.Binary;
 using System.Threading;
 using Apparator.Messages;
 using Microsoft.Build.Framework;
 using MSBuildTask = Microsoft.Build.Utilities.Task;
+using TaskItem = Microsoft.Build.Utilities.TaskItem;
 
 namespace Apparator.Tasks
 {
@@ -56,6 +58,7 @@ namespace Apparator.Tasks
             stream.Connect(10 * 1000);
 
             Log.LogMessage(DefaultLevel, "Sending message");
+
             var formatter = new BinaryFormatter()
             {
                 Binder = new ApparatorSerializationBinder(),
@@ -63,14 +66,14 @@ namespace Apparator.Tasks
 
             var request = new ExecuteTaskMessage()
             {
-                Arguments = _properties.Where(kvp => !kvp.Key.Output).ToDictionary(kvp => kvp.Key.Name, kvp => kvp.Value),
+                Arguments = _properties.Where(kvp => !kvp.Key.Output).ToDictionary(kvp => kvp.Key.Name, kvp => SerializableTaskItem.Wrap(kvp.Value)),
                 AssemblyFile = _assemblyFile,
                 AssemblyName = _assemblyName,
                 OutputParameters = _properties.Where(kvp => kvp.Key.Output).Select(kvp => kvp.Key.Name).ToArray(),
                 TaskName = _taskName,
                 TypeName = _typeName,
             };
-            
+
             formatter.Serialize(stream, request);
 
             Log.LogMessage(DefaultLevel, "Waiting for reply");
@@ -86,7 +89,7 @@ namespace Apparator.Tasks
                     {
                         if (result.Outputs.TryGetValue(property.Name, out var value))
                         {
-                            SetPropertyValue(property, value);
+                            SetPropertyValue(property, SerializableTaskItem.Unwrap(value));
                         }
                     }
 

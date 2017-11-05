@@ -1,13 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.Serialization;
 using System.Runtime.Serialization.Formatters.Binary;
 using System.Threading;
 using System.Threading.Tasks;
 using Apparator.Messages;
-using Microsoft.Build.Framework;
+using ITask = Microsoft.Build.Framework.ITask;
+using TaskItem = Microsoft.Build.Utilities.TaskItem;
 
 namespace Apparator.Host
 {
@@ -40,6 +40,7 @@ namespace Apparator.Host
         private static Task OnConnected(Connection connection)
         {
             var stream = connection.Stream;
+
             var formatter = new BinaryFormatter()
             {
                 Binder = new ApparatorSerializationBinder(),
@@ -68,7 +69,7 @@ namespace Apparator.Host
 
                 foreach (var argument in message.Arguments)
                 {
-                    type.GetProperty(argument.Key).SetValue(task, argument.Value);
+                    type.GetProperty(argument.Key).SetValue(task, SerializableTaskItem.Unwrap(argument.Value));
                 }
 
                 var success = task.Execute();
@@ -81,7 +82,7 @@ namespace Apparator.Host
 
                 foreach (var output in message.OutputParameters)
                 {
-                    result.Outputs[output] = type.GetProperty(output).GetValue(task);
+                    result.Outputs[output] = SerializableTaskItem.Wrap(type.GetProperty(output).GetValue(task));
                 }
 
                 try

@@ -3,10 +3,13 @@ using System.Collections.Generic;
 using System.IO;
 using System.IO.Pipes;
 using System.Reflection;
+using System.Runtime.Serialization;
 using System.Runtime.Serialization.Formatters.Binary;
 using System.Threading;
 using System.Threading.Tasks;
 using Apparator.Messages;
+using Microsoft.Build.Framework;
+using Microsoft.Build.Utilities;
 
 namespace Apparator.TestClient
 {
@@ -44,15 +47,24 @@ namespace Apparator.TestClient
                     var envelope = new ExecuteTaskMessage()
                     {
                         AssemblyFile = Path.Combine(Path.GetDirectoryName(Assembly.GetEntryAssembly().Location), "Apparator.Tasks.dll"),
-                        TaskName = "Echo",
-                        TypeName = "Apparator.Tasks.Echo",
+                        TaskName = "SayHello",
+                        TypeName = "Apparator.Tasks.SayHello",
                         Arguments = new Dictionary<string, object>()
                         {
                             { "Message", message },
+                            {
+                                "Individuals",
+                                new SerializableTaskItem[]
+                                {
+                                    new SerializableTaskItem(new TaskItem("Ryan Nowak")),
+                                    new SerializableTaskItem(new TaskItem("Pranav")),
+                                }
+                            }
+
                         },
                         OutputParameters = new string[]
                         {
-                            "Response",
+                            "Responses",
                         },
                     };
 
@@ -61,7 +73,7 @@ namespace Apparator.TestClient
                     Console.WriteLine("Reading reply");
                     var reply = (ExecuteTaskResultMessage)formatter.Deserialize(stream);
 
-                    Console.WriteLine("Got reply: " + reply.Outputs["Response"]);
+                    Console.WriteLine("Got reply: " + SerializableTaskItem.Unwrap(reply.Outputs["Responses"]));
                 }
             }
             catch (OperationCanceledException)

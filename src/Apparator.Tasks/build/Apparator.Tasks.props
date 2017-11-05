@@ -28,4 +28,25 @@
     </Task>
   </UsingTask>
   <UsingTask TaskName="Apparator.Tasks.Echo" AssemblyFile="$(TaskAssembly)" Condition="'$(MsBuildApparatorFeature)'!='true'"/>
+  
+  <UsingTask TaskName="SayHello" TaskFactory="Apparator.Tasks.ApparatorTaskFactory" AssemblyFile="$(TaskFactoryAssembly)" Condition="'$(MsBuildApparatorFeature)'=='true'">
+    <ParameterGroup>
+      <Message ParameterType="System.String" Required="true" />
+      <Individuals ParameterType="Microsoft.Build.Framework.ITaskItem[]" Required="true" />
+      <Responses ParameterType="Microsoft.Build.Framework.ITaskItem[]" Output="true" />
+    </ParameterGroup>
+    <Task>
+      <ApparatorTask>
+        <!-- Fully-qualifed type name of the Task-->
+        <TypeName>Apparator.Tasks.SayHello</TypeName>
+
+        <!-- Path to the Task assembly -->
+        <AssemblyFile>$(TaskAssembly)</AssemblyFile>
+
+        <!-- ID of the Apparator host -->
+        <HostId>testhost</HostId>
+      </ApparatorTask>
+    </Task>
+  </UsingTask>
+  <UsingTask TaskName="Apparator.Tasks.SayHello" AssemblyFile="$(TaskAssembly)" Condition="'$(MsBuildApparatorFeature)'!='true'"/>
 </Project>
