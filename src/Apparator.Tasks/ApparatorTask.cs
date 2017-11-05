@@ -4,13 +4,14 @@ using System.Diagnostics;
 using System.IO.Pipes;
 using System.Linq;
 using System.Runtime.Serialization.Formatters.Binary;
+using System.Threading;
 using Apparator.Messages;
 using Microsoft.Build.Framework;
 using MSBuildTask = Microsoft.Build.Utilities.Task;
 
 namespace Apparator.Tasks
 {
-    internal class ApparatorTask : MSBuildTask, IGeneratedTask
+    internal class ApparatorTask : MSBuildTask, IGeneratedTask, ICancelableTask
     {
         private readonly MessageImportance DefaultLevel = MessageImportance.High;
 
@@ -20,6 +21,7 @@ namespace Apparator.Tasks
         private readonly string _typeName;
         private readonly string _hostId;
 
+        private readonly CancellationTokenSource _cts;
         private readonly Dictionary<TaskPropertyInfo, object> _properties;
 
         public ApparatorTask(string taskName, TaskPropertyInfo[] properties, string assemblyName, string assemblyFile, string typeName, string hostId)
@@ -29,7 +31,8 @@ namespace Apparator.Tasks
             _assemblyFile = assemblyFile;
             _typeName = typeName;
             _hostId = hostId;
-            
+
+            _cts = new CancellationTokenSource();
             _properties = new Dictionary<TaskPropertyInfo, object>();
 
             for (var i = 0; i < properties.Length; i++)
@@ -39,6 +42,11 @@ namespace Apparator.Tasks
                 var value = property.PropertyType.IsValueType ? Activator.CreateInstance(property.PropertyType) : null;
                 _properties.Add(property, value);
             }
+        }
+
+        public void Cancel()
+        {
+            throw new NotImplementedException();
         }
 
         public override bool Execute()
@@ -67,7 +75,7 @@ namespace Apparator.Tasks
 
             Log.LogMessage(DefaultLevel, "Waiting for reply");
 
-            while (true)
+            while (!_cts.IsCancellationRequested)
             {
                 var message = formatter.Deserialize(stream);
                 if (message is ExecuteTaskResultMessage result)
@@ -85,6 +93,8 @@ namespace Apparator.Tasks
                     return result.Success;
                 }
             }
+
+            return false;
         }
 
         public object GetPropertyValue(TaskPropertyInfo property)
