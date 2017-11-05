@@ -12,8 +12,6 @@ namespace Apparator.Tasks
 {
     internal class ApparatorTask : MSBuildTask, IGeneratedTask, ICancelableTask
     {
-        private readonly MessageImportance DefaultLevel = MessageImportance.High;
-
         private readonly string _assemblyFile;
         private readonly string _assemblyName;
         private readonly string _taskName;
