@@ -7,18 +7,25 @@
 
   <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore.All" Version="2.0.0" />
-    <PackageReference Include="Apparator.Core" Version="0.1.0-*" />
+    <PackageReference Include="Apparator.Tasks" Version="0.1.0-*" />
   </ItemGroup>
 
   <ItemGroup>
     <DotNetCliToolReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Tools" Version="2.0.0" />
   </ItemGroup>
 
+  <Target Name="TestApparator">
+    <Message Importance="High" Text="Apparator Loaded" Condition="'$(Apparator)'=='true'" />
+  </Target>
+
   <Target Name="DoTheNeedful" DependsOnTargets="_ResolveInputArguments;_CreateResponseFileForMvcRazorPrecompile">
+    <Message Importance="High" Text="Apparator Loaded" Condition="'$(Apparator)'=='true'" />
+    
+    <Echo Message="Heyyyyyyyyyy">
+      <Output TaskParameter="Response" PropertyName="EchoReply" />
+    </Echo>
 
-    <Apparate Debug="$(Debug)" DepsFile="$(ProjectDepsFilePath)" EntryAssembly="Microsoft.AspNetCore.Mvc.Razor.ViewCompilation" EntryAssemblyPath="$(_MvcViewCompilationBinaryPath)" EntryPointType="Microsoft.AspNetCore.Mvc.Razor.ViewCompilation.Program" EntryPointMethod="Main" Args="$(MSBuildProjectDirectory)\$(_MvcRazorResponseFilePath)" />
-
-    <Message Importance="High" Text="Did the needful" />
+    <Message Importance="High" Text="Got response $(EchoReply)" />
   </Target>
 
 </Project>

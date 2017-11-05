@@ -1,0 +1,31 @@
+<Project TreatAsLocalProperty="TaskFolder;TaskAssembly;TaskFactoryAssembly">
+  <PropertyGroup>
+    <TaskFolder>netstandard2.0</TaskFolder>
+    <TaskAssembly>$(MSBuildThisFileDirectory)..\tasks\$(TaskFolder)\Apparator.Tasks.dll</TaskAssembly>
+    <TaskFactoryAssembly>$(MSBuildThisFileDirectory)..\tasks\$(TaskFolder)\Apparator.Tasks.dll</TaskFactoryAssembly>
+    <Apparator>true</Apparator>
+  </PropertyGroup>
+
+  <!-- 
+    Generate a wrapper if the $(MsBuildApparatorFeature) is available, otherwise just use the task normally.
+  -->
+  <UsingTask TaskName="Echo" TaskFactory="Apparator.Tasks.ApparatorTaskFactory" AssemblyFile="$(TaskFactoryAssembly)" Condition="'$(MsBuildApparatorFeature)'=='true'">
+    <ParameterGroup>
+      <Message ParameterType="System.String" Required="true" />
+      <Response ParameterType="System.String" Output="true" />
+    </ParameterGroup>
+    <Task>
+      <ApparatorTask>
+        <!-- Fully-qualifed type name of the Task-->
+        <TypeName>Apparator.Tasks.Echo</TypeName>
+
+        <!-- Path to the Task assembly -->
+        <AssemblyFile>$(TaskAssembly)</AssemblyFile>
+
+        <!-- ID of the Apparator host -->
+        <HostId>testhost</HostId>
+      </ApparatorTask>
+    </Task>
+  </UsingTask>
+  <UsingTask TaskName="Apparator.Tasks.Echo" AssemblyFile="$(TaskAssembly)" Condition="'$(MsBuildApparatorFeature)'!='true'"/>
+</Project>
