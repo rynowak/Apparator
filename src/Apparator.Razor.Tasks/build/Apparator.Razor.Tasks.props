@@ -1,0 +1,28 @@
+<Project TreatAsLocalProperty="TaskFolder;TaskAssembly;TaskFactoryAssembly">
+  <PropertyGroup>
+    <TaskFolder>netstandard2.0</TaskFolder>
+    <TaskAssembly>$(MSBuildThisFileDirectory)..\tasks\$(TaskFolder)\Apparator.Razor.Tasks.dll</TaskAssembly>
+    <TaskFactoryAssembly>$(MSBuildThisFileDirectory)..\tasks\$(TaskFolder)\Apparator.Tasks.dll</TaskFactoryAssembly>
+    <Apparator>true</Apparator>
+  </PropertyGroup>
+
+  <UsingTask TaskName="Rzc" TaskFactory="Apparator.Tasks.ApparatorTaskFactory" AssemblyFile="$(TaskFactoryAssembly)" Condition="'$(MsBuildApparatorFeature)'=='true'">
+    <ParameterGroup>
+      <References ParameterType="Microsoft.Build.Framework.ITaskItem[]" Required="true" />
+      <OutputAssembly ParameterType="System.String" Required="true" />
+    </ParameterGroup>
+    <Task>
+      <ApparatorTask>
+        <!-- Fully-qualifed type name of the Task-->
+        <TypeName>Apparator.Razor.Tasks.Rzc</TypeName>
+
+        <!-- Path to the Task assembly -->
+        <AssemblyFile>$(TaskAssembly)</AssemblyFile>
+
+        <!-- ID of the Apparator host -->
+        <HostId>testhost</HostId>
+      </ApparatorTask>
+    </Task>
+  </UsingTask>
+  <UsingTask TaskName="Apparator.Razor.Tasks.Rzc" AssemblyFile="$(TaskAssembly)" Condition="'$(MsBuildApparatorFeature)'!='true'"/>
+</Project>

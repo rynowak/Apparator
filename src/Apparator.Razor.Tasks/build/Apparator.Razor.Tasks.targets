@@ -1,0 +1,22 @@
+<Project>
+  <Target
+    Name="RazorCompile" 
+    DependsOnTargets="ResolveAssemblyReferences;CoreCompile"
+    Inputs="$(MSBuildAllProjects);$(IntermediateOutputPath)$(TargetName)$(TargetExt)"
+    Outputs="$(IntermediateOutputPath)$(TargetName).PrecompiledViews$(TargetExt)">
+
+    <PropertyGroup>
+      <_RazorOutputAssembly>$(IntermediateOutputPath)$(TargetName).PrecompiledViews$(TargetExt)"</_RazorOutputAssembly>
+    </PropertyGroup>
+    
+    <ItemGroup>
+      <_RazorReferencePath Include="@(ReferencePath)"/> 
+    </ItemGroup>
+
+    <Rzc
+      References="@(_RazorReferencePath)"
+      OutputAssembly="$(_RazorOutputAssembly)">
+      
+    </Rzc>
+  </Target>
+</Project>

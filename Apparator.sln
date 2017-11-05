@@ -15,6 +15,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Apparator.Host", "src\Appar
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Apparator.Tasks", "src\Apparator.Tasks\Apparator.Tasks.csproj", "{54815FE3-7915-43DA-AA6F-3640D4C5BB07}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Apparator.Razor.Tasks", "src\Apparator.Razor.Tasks\Apparator.Razor.Tasks.csproj", "{83888C7C-A5AB-45A4-9D47-A80502051B3C}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -37,6 +39,10 @@ Global
 		{54815FE3-7915-43DA-AA6F-3640D4C5BB07}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{54815FE3-7915-43DA-AA6F-3640D4C5BB07}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{54815FE3-7915-43DA-AA6F-3640D4C5BB07}.Release|Any CPU.Build.0 = Release|Any CPU
+		{83888C7C-A5AB-45A4-9D47-A80502051B3C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{83888C7C-A5AB-45A4-9D47-A80502051B3C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{83888C7C-A5AB-45A4-9D47-A80502051B3C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{83888C7C-A5AB-45A4-9D47-A80502051B3C}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -46,6 +52,7 @@ Global
 		{924ABA42-6842-4359-B64D-C8DDDBEA96B6} = {1AA96BDF-4B01-45FA-B8C5-66790A867B16}
 		{C0CFD13A-2867-45FE-AABE-45446DB24B57} = {1AA96BDF-4B01-45FA-B8C5-66790A867B16}
 		{54815FE3-7915-43DA-AA6F-3640D4C5BB07} = {1AA96BDF-4B01-45FA-B8C5-66790A867B16}
+		{83888C7C-A5AB-45A4-9D47-A80502051B3C} = {1AA96BDF-4B01-45FA-B8C5-66790A867B16}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {D00852D0-43D8-46D2-8DED-C194995A987A}
