@@ -1,15 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO.Pipes;
 using System.Linq;
-using System.Runtime.Serialization;
 using System.Runtime.Serialization.Formatters.Binary;
 using System.Threading;
 using Apparator.Messages;
 using Microsoft.Build.Framework;
 using MSBuildTask = Microsoft.Build.Utilities.Task;
-using TaskItem = Microsoft.Build.Utilities.TaskItem;
 
 namespace Apparator.Tasks
 {
@@ -24,7 +21,9 @@ namespace Apparator.Tasks
         private readonly string _hostId;
 
         private readonly CancellationTokenSource _cts;
+        private readonly BinaryFormatter _formatter;
         private readonly Dictionary<TaskPropertyInfo, object> _properties;
+
 
         public ApparatorTask(string taskName, TaskPropertyInfo[] properties, string assemblyName, string assemblyFile, string typeName, string hostId)
         {
@@ -35,6 +34,11 @@ namespace Apparator.Tasks
             _hostId = hostId;
 
             _cts = new CancellationTokenSource();
+            _formatter = new BinaryFormatter()
+            {
+                Binder = new ApparatorSerializationBinder()
+            };
+
             _properties = new Dictionary<TaskPropertyInfo, object>();
 
             for (var i = 0; i < properties.Length; i++)
@@ -46,46 +50,25 @@ namespace Apparator.Tasks
             }
         }
 
+        private IEnumerable<TaskPropertyInfo> InputProperties => _properties.Where(kvp => !kvp.Key.Output).Select(kvp => kvp.Key).ToArray();
+
+        private IEnumerable<TaskPropertyInfo> OutputProperties => _properties.Where(kvp => kvp.Key.Output).Select(kvp => kvp.Key).ToArray();
+
         public void Cancel()
         {
-            throw new NotImplementedException();
+            _cts.Cancel();
         }
 
         public override bool Execute()
         {
-            Log.LogMessage(DefaultLevel, "Connecting to host: {0}", _hostId);
-            var stream = new NamedPipeClientStream(".", $"apparator.{_hostId}", PipeDirection.InOut, PipeOptions.None);
-            stream.Connect(10 * 1000);
-
-            Log.LogMessage(DefaultLevel, "Sending message");
-
-            var formatter = new BinaryFormatter()
+            try
             {
-                Binder = new ApparatorSerializationBinder(),
-            };
-
-            var request = new ExecuteTaskMessage()
-            {
-                Arguments = _properties.Where(kvp => !kvp.Key.Output).ToDictionary(kvp => kvp.Key.Name, kvp => SerializableTaskItem.Wrap(kvp.Value)),
-                AssemblyFile = _assemblyFile,
-                AssemblyName = _assemblyName,
-                OutputParameters = _properties.Where(kvp => kvp.Key.Output).Select(kvp => kvp.Key.Name).ToArray(),
-                TaskName = _taskName,
-                TypeName = _typeName,
-            };
-
-            formatter.Serialize(stream, request);
-
-            Log.LogMessage(DefaultLevel, "Waiting for reply");
-
-            while (!_cts.IsCancellationRequested)
-            {
-                var message = formatter.Deserialize(stream);
-                if (message is ExecuteTaskResultMessage result)
+                using (var stream = Connect(_hostId))
                 {
-                    Log.LogMessage(DefaultLevel, "Got reply: Success={0}", result.Success);
+                    StartRemoteTask(stream);
 
-                    foreach (var property in _properties.Where(kvp => kvp.Key.Output).Select(kvp => kvp.Key).ToArray())
+                    var result = WaitForResult(stream);
+                    foreach (var property in OutputProperties)
                     {
                         if (result.Outputs.TryGetValue(property.Name, out var value))
                         {
@@ -96,8 +79,98 @@ namespace Apparator.Tasks
                     return result.Success;
                 }
             }
+            catch (OperationCanceledException)
+            {
+                Log.LogWarning("task cancelled");
+                return false;
+            }
+        }
 
-            return false;
+        private NamedPipeClientStream Connect(string hostId)
+        {
+            var pipeName = $"apparator.{hostId}";
+            var stream = new NamedPipeClientStream(".", pipeName, PipeDirection.InOut, PipeOptions.None);
+
+            while (true)
+            {
+                _cts.Token.ThrowIfCancellationRequested();
+
+                try
+                {
+                    stream.Connect(10 * 3000);
+                    return stream;
+                }
+                catch (TimeoutException)
+                {
+                    Log.LogWarning("waiting for apparator host with pipe name '{0}'", pipeName);
+                }
+            }
+        }
+
+        private BinaryFormatter CreateFormatter()
+        {
+            return new BinaryFormatter()
+            {
+                Binder = new ApparatorSerializationBinder(),
+            };
+        }
+
+        private void StartRemoteTask(NamedPipeClientStream stream)
+        {
+            var request = new ExecuteTaskMessage()
+            {
+                Arguments = InputProperties.ToDictionary(p => p.Name, p => SerializableTaskItem.Wrap(GetPropertyValue(p))),
+                AssemblyFile = _assemblyFile,
+                AssemblyName = _assemblyName,
+                OutputParameters =  OutputProperties.Select(p => p.Name).ToArray(),
+                TaskName = _taskName,
+                TypeName = _typeName,
+            };
+
+            _formatter.Serialize(stream, request);
+        }
+
+        private ExecuteTaskResultMessage WaitForResult(NamedPipeClientStream stream)
+        {
+            while (true)
+            {
+                _cts.Token.ThrowIfCancellationRequested();
+
+                var message = _formatter.Deserialize(stream);
+                if (message is ExecuteTaskResultMessage result)
+                {
+                    return result;
+                }
+
+                LogMessage(message);
+            }
+        }
+
+        private void LogMessage(object obj)
+        {
+            switch (obj)
+            {
+                case BuildErrorEventArgsMessage error:
+                    BuildEngine5.LogErrorEvent(error.ToEventArgs());
+                    break;
+
+                case BuildWarningEventArgsMessage warning:
+                    BuildEngine5.LogWarningEvent(warning.ToEventArgs());
+                    break;
+
+                case BuildMessageEventArgsMessage message:
+                    BuildEngine5.LogMessageEvent(message.ToEventArgs());
+                    break;
+
+                case TelemetryMessage telemetry:
+                    BuildEngine5.LogTelemetry(telemetry.EventName, telemetry.Properties);
+                    break;
+
+                default:
+                    Log.LogError("unexpected message type {0}", obj.GetType());
+                    break;
+
+            }
         }
 
         public object GetPropertyValue(TaskPropertyInfo property)

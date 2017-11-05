@@ -71,9 +71,20 @@ namespace Apparator.TestClient
                     formatter.Serialize(stream, envelope);
 
                     Console.WriteLine("Reading reply");
-                    var reply = (ExecuteTaskResultMessage)formatter.Deserialize(stream);
 
-                    Console.WriteLine("Got reply: " + SerializableTaskItem.Unwrap(reply.Outputs["Responses"]));
+                    while (!_cts.Token.IsCancellationRequested)
+                    {
+                        var reply = formatter.Deserialize(stream);
+                        if (reply is ExecuteTaskResultMessage result)
+                        {
+                            Console.WriteLine("Got reply: " + SerializableTaskItem.Unwrap(result.Outputs["Responses"]));
+                            break;
+                        }
+                        else
+                        {
+                            Console.WriteLine("Got message: " + reply);
+                        }
+                    }
                 }
             }
             catch (OperationCanceledException)

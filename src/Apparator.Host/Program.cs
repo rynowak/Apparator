@@ -65,7 +65,7 @@ namespace Apparator.Host
                 var type = assembly.GetType(message.TypeName, throwOnError: true);
 
                 var task = (ITask)Activator.CreateInstance(type);
-                task.BuildEngine = new ApparatorBuildEngine();
+                task.BuildEngine = new ApparatorBuildEngine(connection, formatter);
 
                 foreach (var argument in message.Arguments)
                 {

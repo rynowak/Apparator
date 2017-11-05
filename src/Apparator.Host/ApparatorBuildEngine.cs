@@ -1,13 +1,23 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Text;
+using System.Runtime.Serialization.Formatters.Binary;
+using Apparator.Messages;
 using Microsoft.Build.Framework;
 
 namespace Apparator.Host
 {
     internal class ApparatorBuildEngine : IBuildEngine5
     {
+        private readonly Connection _connection;
+        private readonly BinaryFormatter _formatter;
+
+        public ApparatorBuildEngine(Connection connection, BinaryFormatter formatter)
+        {
+            _connection = connection;
+            _formatter = formatter;
+        }
+
         public bool IsRunningMultipleNodes => throw new NotImplementedException();
 
         public bool ContinueOnError => throw new NotImplementedException();
@@ -45,22 +55,31 @@ namespace Apparator.Host
 
         public void LogCustomEvent(CustomBuildEventArgs e)
         {
+            throw new NotSupportedException();
         }
 
         public void LogErrorEvent(BuildErrorEventArgs e)
         {
+            _formatter.Serialize(_connection.Stream, new BuildErrorEventArgsMessage(e));
         }
 
         public void LogMessageEvent(BuildMessageEventArgs e)
         {
+            _formatter.Serialize(_connection.Stream, new BuildMessageEventArgsMessage(e));
         }
 
         public void LogTelemetry(string eventName, IDictionary<string, string> properties)
         {
+            _formatter.Serialize(_connection.Stream, new TelemetryMessage()
+            {
+                EventName = eventName,
+                Properties = properties,
+            });
         }
 
         public void LogWarningEvent(BuildWarningEventArgs e)
         {
+            _formatter.Serialize(_connection.Stream, new BuildWarningEventArgsMessage(e));
         }
 
         public void Reacquire()
