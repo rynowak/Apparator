@@ -9,11 +9,11 @@ using Microsoft.CodeAnalysis.Razor;
 
 namespace Microsoft.AspNetCore.Mvc.Razor.Internal
 {
-    public class LazyMetadataReferenceFeature : IMetadataReferenceFeature
+    public class CachedMetadataReferenceFeature : IMetadataReferenceFeature
     {
         private readonly MetadataReference[] _references;
 
-        public LazyMetadataReferenceFeature(IEnumerable<string> references)
+        public CachedMetadataReferenceFeature(IEnumerable<string> references)
         {
             _references = references.Select(r => MetadataReference.CreateFromFile(r)).ToArray();
         }

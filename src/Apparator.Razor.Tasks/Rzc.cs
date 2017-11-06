@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -55,13 +56,17 @@ namespace Apparator.Razor.Tasks
             //Log.LogMessage(MessageImportance.High, "output assembly: {0}", OutputAssembly);
             //Log.LogMessage(MessageImportance.High, "project root: {0}", ProjectRoot);
 
+            var total = Stopwatch.StartNew();
+            var stopwatch = Stopwatch.StartNew();
+            var timings = new List<KeyValuePair<string, TimeSpan>>();
+
+            var referenceFeature = new CachedMetadataReferenceFeature(References.Select(r => r.GetMetadata("FullPath")));
             var engine = RazorEngine.Create(b =>
             {
                 RazorExtensions.Register(b);
 
                 // Roslyn + TagHelpers infrastructure
-                var metadataReferenceFeature = new LazyMetadataReferenceFeature(References.Select(r => r.GetMetadata("FullPath")));
-                b.Features.Add(metadataReferenceFeature);
+                b.Features.Add(referenceFeature);
                 b.Features.Add(new Microsoft.CodeAnalysis.Razor.CachingCompilationTagHelperFeature());
 
                 // TagHelperDescriptorProviders (actually do tag helper discovery)
@@ -72,6 +77,15 @@ namespace Apparator.Razor.Tasks
             var project = new FileProviderRazorProject(new PhysicalFileProvider(ProjectRoot));
             var templateEngine = new MvcRazorTemplateEngine(engine, project);
 
+            stopwatch.Stop();
+            timings.Add(new KeyValuePair<string, TimeSpan>("CreateEngine", stopwatch.Elapsed));
+
+            stopwatch.Restart();
+            GC.KeepAlive(engine.Features.OfType<ITagHelperFeature>().Single().GetDescriptors());
+            stopwatch.Stop();
+            timings.Add(new KeyValuePair<string, TimeSpan>("TagHelpers", stopwatch.Elapsed));
+
+            stopwatch.Restart();
             var results = GenerateCode(templateEngine);
             var success = true;
 
@@ -100,10 +114,20 @@ namespace Apparator.Razor.Tasks
             {
                 return false;
             }
-            
-            var compilation = CreateCompilation(results, Path.GetFileNameWithoutExtension(OutputAssembly));
+            stopwatch.Stop();
+            timings.Add(new KeyValuePair<string, TimeSpan>("GenerateCSharp", stopwatch.Elapsed));
+
+            stopwatch.Restart();
+            var compilation = CreateCompilation(results, referenceFeature.References, Path.GetFileNameWithoutExtension(OutputAssembly));
+            stopwatch.Stop();
+            timings.Add(new KeyValuePair<string, TimeSpan>("CreateCompilation", stopwatch.Elapsed));
+
+            stopwatch.Restart();
             var resources = GetResources(results);
-            
+            stopwatch.Stop();
+            timings.Add(new KeyValuePair<string, TimeSpan>("GenerateCSharp", stopwatch.Elapsed));
+
+            stopwatch.Restart();
             var emitResult = EmitAssembly(
                 compilation,
                 new EmitOptions(),
@@ -128,6 +152,16 @@ namespace Apparator.Razor.Tasks
 
                 return false;
             }
+            stopwatch.Stop();
+            timings.Add(new KeyValuePair<string, TimeSpan>("EmitAssembly", stopwatch.Elapsed));
+
+            total.Stop();
+            timings.Add(new KeyValuePair<string, TimeSpan>("Total", total.Elapsed));
+
+            var report =
+                "Rzr Summary:" + Environment.NewLine +
+                string.Join(Environment.NewLine, timings.Select(kvp => $"{kvp.Key}:{new string(' ', 20 - kvp.Key.Length)}{kvp.Value}"));
+            Log.LogMessage(MessageImportance.High, report);
 
             return true;
         }
@@ -172,7 +206,7 @@ namespace Apparator.Razor.Tasks
             return results;
         }
 
-        private CSharpCompilation CreateCompilation(ViewCompilationInfo[] results, string assemblyname)
+        private CSharpCompilation CreateCompilation(ViewCompilationInfo[] results, IEnumerable<MetadataReference> references, string assemblyname)
         {
             var options = new CSharpCompilationOptions(
                 outputKind: OutputKind.DynamicallyLinkedLibrary,
@@ -181,7 +215,7 @@ namespace Apparator.Razor.Tasks
 
             var compilation = CSharpCompilation.Create(
                 assemblyName: assemblyname,
-                references: References.Select(r => MetadataReference.CreateFromFile(r.ItemSpec)),
+                references: references,
                 options: options);
             
             var syntaxTrees = new SyntaxTree[results.Length];
