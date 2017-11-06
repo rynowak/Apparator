@@ -6,16 +6,23 @@
     Outputs="$(IntermediateOutputPath)$(TargetName).PrecompiledViews$(TargetExt)">
 
     <PropertyGroup>
-      <_RazorOutputAssembly>$(IntermediateOutputPath)$(TargetName).PrecompiledViews$(TargetExt)"</_RazorOutputAssembly>
+      <_RazorOutputAssembly>$(IntermediateOutputPath)$(TargetName).PrecompiledViews$(TargetExt)</_RazorOutputAssembly>
     </PropertyGroup>
     
     <ItemGroup>
-      <_RazorReferencePath Include="@(ReferencePath)"/> 
+      <_RazorReferencePath Include="@(ReferencePath)"/>
+      <_RazorReferencePath Include="$([System.IO.Path]::GetFullPath('$(IntermediateOutputPath)$(TargetName)$(TargetExt)'))"/>
+    </ItemGroup>
+
+    <ItemGroup>
+      <_RazorCompile Include="@(Content)" Condition="'%(Extension)'=='.cshtml'" />
     </ItemGroup>
 
     <Rzc
       References="@(_RazorReferencePath)"
-      OutputAssembly="$(_RazorOutputAssembly)">
+      OutputAssembly="$(_RazorOutputAssembly)"
+      ProjectRoot="$(MSBuildProjectDirectory)"
+      Sources="@(_RazorCompile)">
       
     </Rzc>
   </Target>

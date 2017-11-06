@@ -10,6 +10,10 @@
     <ParameterGroup>
       <References ParameterType="Microsoft.Build.Framework.ITaskItem[]" Required="true" />
       <OutputAssembly ParameterType="System.String" Required="true" />
+      <ProjectRoot ParameterType="System.String" Required="true" />
+      <Sources ParameterType="Microsoft.Build.Framework.ITaskItem[]" Required="true" />
+      <EmbedSources ParameterType="System.Boolean" />
+      <DebugType ParameterType="System.String" />
     </ParameterGroup>
     <Task>
       <ApparatorTask>
