@@ -62,7 +62,7 @@ namespace Apparator.Razor.Tasks
                 // Roslyn + TagHelpers infrastructure
                 var metadataReferenceFeature = new LazyMetadataReferenceFeature(References.Select(r => r.GetMetadata("FullPath")));
                 b.Features.Add(metadataReferenceFeature);
-                b.Features.Add(new Microsoft.CodeAnalysis.Razor.CompilationTagHelperFeature());
+                b.Features.Add(new Microsoft.CodeAnalysis.Razor.CachingCompilationTagHelperFeature());
 
                 // TagHelperDescriptorProviders (actually do tag helper discovery)
                 b.Features.Add(new Microsoft.CodeAnalysis.Razor.DefaultTagHelperDescriptorProvider());
