@@ -42,18 +42,18 @@ namespace Apparator.Razor.Tasks
 
         public override bool Execute()
         {
-            foreach (var reference in References)
-            {
-                Log.LogMessage(MessageImportance.High, "reference assembly: {0}", reference.ItemSpec);
-            }
+            //foreach (var reference in References)
+            //{
+            //    Log.LogMessage(MessageImportance.High, "reference assembly: {0}", reference.ItemSpec);
+            //}
 
-            foreach (var source in Sources)
-            {
-                Log.LogMessage(MessageImportance.High, ".cshtml source: {0}", source.ItemSpec);
-            }
+            //foreach (var source in Sources)
+            //{
+            //    Log.LogMessage(MessageImportance.High, ".cshtml source: {0}", source.ItemSpec);
+            //}
 
-            Log.LogMessage(MessageImportance.High, "output assembly: {0}", OutputAssembly);
-            Log.LogMessage(MessageImportance.High, "project root: {0}", ProjectRoot);
+            //Log.LogMessage(MessageImportance.High, "output assembly: {0}", OutputAssembly);
+            //Log.LogMessage(MessageImportance.High, "project root: {0}", ProjectRoot);
 
             var engine = RazorEngine.Create(b =>
             {
