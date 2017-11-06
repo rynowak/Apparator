@@ -6,6 +6,7 @@ using System.Runtime.Serialization.Formatters.Binary;
 using System.Threading;
 using System.Threading.Tasks;
 using Apparator.Messages;
+using Microsoft.Build.Framework;
 using ITask = Microsoft.Build.Framework.ITask;
 using TaskItem = Microsoft.Build.Utilities.TaskItem;
 
@@ -72,7 +73,29 @@ namespace Apparator.Host
                     type.GetProperty(argument.Key).SetValue(task, SerializableTaskItem.Unwrap(argument.Value));
                 }
 
-                var success = task.Execute();
+                bool success;
+                try
+                {
+                    success = task.Execute();
+                }
+                catch (Exception ex)
+                {
+                    task.BuildEngine.LogErrorEvent(new BuildErrorEventArgs(
+                        null,
+                        null,
+                        null,
+                        -1,
+                        -1,
+                        -1,
+                        -1,
+                        "exception executing task {0} - {1}",
+                        null,
+                        null,
+                        DateTime.Now,
+                        message.TaskName, 
+                        ex));
+                    success = false;
+                }
 
                 var result = new ExecuteTaskResultMessage()
                 {
@@ -80,9 +103,12 @@ namespace Apparator.Host
                     Outputs = new Dictionary<string, object>(),
                 };
 
-                foreach (var output in message.OutputParameters)
+                if (success)
                 {
-                    result.Outputs[output] = SerializableTaskItem.Wrap(type.GetProperty(output).GetValue(task));
+                    foreach (var output in message.OutputParameters)
+                    {
+                        result.Outputs[output] = SerializableTaskItem.Wrap(type.GetProperty(output).GetValue(task));
+                    }
                 }
 
                 try
