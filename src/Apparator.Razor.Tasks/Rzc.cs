@@ -159,7 +159,7 @@ namespace Apparator.Razor.Tasks
             timings.Add(new KeyValuePair<string, TimeSpan>("Total", total.Elapsed));
 
             var report =
-                "Rzr Summary:" + Environment.NewLine +
+                "Rzc Summary:" + Environment.NewLine +
                 string.Join(Environment.NewLine, timings.Select(kvp => $"{kvp.Key}:{new string(' ', 20 - kvp.Key.Length)}{kvp.Value}"));
             Log.LogMessage(MessageImportance.High, report);
 
