@@ -1,4 +1,10 @@
 <Project>
+  <PropertyGroup>
+    <RazorCompileDependsOn>$(RazorCompileDependsOn);RazorCompileCore</RazorCompileDependsOn>
+    <BuildDependsOn>$(BuildDependsOn);RazorCompile</BuildDependsOn>
+  </PropertyGroup>
+  <Target Name="RazorCompile" DependsOnTargets="$(RazorCompileDependsOn)">
+  </Target>
   <Target
     Name="RazorCompile" 
     DependsOnTargets="ResolveAssemblyReferences;CoreCompile"
@@ -6,7 +12,7 @@
     Outputs="$(IntermediateOutputPath)$(TargetName).PrecompiledViews$(TargetExt)">
 
     <PropertyGroup>
-      <_RazorOutputAssembly>$(IntermediateOutputPath)$(TargetName).PrecompiledViews$(TargetExt)</_RazorOutputAssembly>
+      <_RazorOutputAssembly>$([System.IO.Path]::GetFullPath('$(IntermediateOutputPath)$(TargetName).PrecompiledViews$(TargetExt)'))</_RazorOutputAssembly>
     </PropertyGroup>
     
     <ItemGroup>
@@ -23,7 +29,15 @@
       OutputAssembly="$(_RazorOutputAssembly)"
       ProjectRoot="$(MSBuildProjectDirectory)"
       Sources="@(_RazorCompile)">
-      
     </Rzc>
+    <ItemGroup>
+      <FileWrites Include="$(_RazorOutputAssembly)" />
+    </ItemGroup>
+
+    <Message Importance="High" Text="$(_RazorOutputAssembly) -> $(OutDir)" />
+    <Copy 
+      SourceFiles="$(_RazorOutputAssembly)"
+      DestinationFolder="$(OutDir)"
+      SkipUnchangedFiles="true"/>
   </Target>
 </Project>
