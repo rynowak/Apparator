@@ -2,47 +2,15 @@
 
   <PropertyGroup>
     <TargetFramework>netcoreapp2.0</TargetFramework>
-    <_MvcViewCompilationBinaryPath>C:\Users\rynowak\.nuget\packages\microsoft.aspnetcore.mvc.razor.viewcompilation\2.0.0\build\netstandard2.0\Microsoft.AspNetCore.Mvc.Razor.ViewCompilation.dll</_MvcViewCompilationBinaryPath>
   </PropertyGroup>
 
   <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore.All" Version="2.0.0" />
-    <PackageReference Include="Apparator.Tasks" Version="0.1.0-*" />
     <PackageReference Include="Apparator.Razor.Tasks" Version="0.1.0-*" />
   </ItemGroup>
 
   <ItemGroup>
     <DotNetCliToolReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Tools" Version="2.0.0" />
   </ItemGroup>
-
-  <ItemGroup>
-    <Individuals Include="David Fowler" />
-    <Individuals Include="Ryan Nowak" />
-    <Individuals Include="Kanye">
-      <VoiceOfAGeneration>true</VoiceOfAGeneration>
-    </Individuals>
-    <Individuals Include="Pranav" />
-  </ItemGroup>
-
-  <Target Name="TestApparator">
-    <Message Importance="High" Text="Apparator Loaded" Condition="'$(Apparator)'=='true'" />
-  </Target>
-
-  <Target Name="DoTheNeedful" DependsOnTargets="_ResolveInputArguments;_CreateResponseFileForMvcRazorPrecompile;TestApparator">
-
-    <Message Importance="High" Text="Running Echo Task" />
-    <Echo Message="Heyyyyyyyyyy">
-      <Output TaskParameter="Response" PropertyName="EchoReply" />
-    </Echo>
-    <Message Importance="High" Text="Got response $(EchoReply)" />
-
-    <Message Importance="High" Text="Running SayHello Task" />
-    <SayHello Message="Hey there {0}, how are things?" Individuals="@(Individuals)">
-      <Output TaskParameter="Responses" ItemName="EchoReply" />
-    </SayHello>
-    <Message Importance="High" Text="Got response '%(EchoReply.Identity)' for a genius." Condition="'%(EchoReply.VoiceOfAGeneration)'=='true'" />
-    <Message Importance="High" Text="Got response '%(EchoReply.Identity)' for some regular guy." Condition="'%(EchoReply.VoiceOfAGeneration)'!='true'" />
-  </Target>
-
 </Project>
 
