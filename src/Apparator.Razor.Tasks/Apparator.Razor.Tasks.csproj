@@ -23,26 +23,19 @@
     <Content Include="$(OutputPath)netstandard2.0\Microsoft.CodeAnalysis.dll" PackagePath="tasks\netstandard2.0\" />
     <Content Include="$(OutputPath)netstandard2.0\Microsoft.CodeAnalysis.CSharp.dll" PackagePath="tasks\netstandard2.0\" />
     <Content Include="$(OutputPath)netstandard2.0\Microsoft.CodeAnalysis.Razor.dll" PackagePath="tasks\netstandard2.0\" />
-    <Content Include="$(OutputPath)netstandard2.0\Microsoft.Extensions.FileProviders.Abstractions.dll" PackagePath="tasks\netstandard2.0\" />
-    <Content Include="$(OutputPath)netstandard2.0\Microsoft.Extensions.FileProviders.Physical.dll" PackagePath="tasks\netstandard2.0\" />
-    <Content Include="$(OutputPath)netstandard2.0\Microsoft.Extensions.FileSystemGlobbing.dll" PackagePath="tasks\netstandard2.0\" />
-    <Content Include="$(OutputPath)netstandard2.0\Microsoft.Extensions.Primitives.dll" PackagePath="tasks\netstandard2.0\" />
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.Build.Framework" Version="15.1.1012">
-      <PrivateAssets>all</PrivateAssets>
-    </PackageReference>
-    <PackageReference Include="Microsoft.Build.Utilities.Core" Version="15.1.1012">
-      <PrivateAssets>all</PrivateAssets>
-    </PackageReference>
-
+    <PackageReference Include="Microsoft.Build.Framework" Version="15.1.1012" />
+    <PackageReference Include="Microsoft.Build.Utilities.Core" Version="15.1.1012" />
     <PackageReference Include="Microsoft.AspNetCore.Razor.Language" Version="2.0.0" />
     <PackageReference Include="Microsoft.AspNetCore.Mvc.Razor.Extensions" Version="2.0.0" />
     <PackageReference Include="Microsoft.CodeAnalysis.Razor" Version="2.0.0" />
-    <PackageReference Include="Microsoft.Extensions.FileProviders.Physical" Version="2.0.0" />
 
-    <ProjectReference Include="..\Apparator.Tasks\Apparator.Tasks.csproj" />
+    <!-- Marks all packages as 'local only' so they don't end up in the nuspec. -->
+    <PackageReference Update="@(PackageReference)" PrivateAssets="All" />
+
+    <ProjectReference Include="..\Apparator.Tasks\Apparator.Tasks.csproj" PrivateAssets="All" />
   </ItemGroup>
 
 </Project>
