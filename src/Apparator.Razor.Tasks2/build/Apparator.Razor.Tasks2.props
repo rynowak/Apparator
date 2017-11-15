@@ -1,0 +1,19 @@
+<Project TreatAsLocalProperty="TaskFolder;TaskAssembly">
+  <PropertyGroup>
+    <TaskFolder>netstandard2.0</TaskFolder>
+    <TaskAssembly>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\tasks\$(TaskFolder)\Apparator.Razor.Tasks2.dll'))</TaskAssembly>
+    <_RazorGenerateCodeAssembly>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\tools\Apparator.Razor.CodeGeneration.dll'))</_RazorGenerateCodeAssembly>
+    <_RazorTagHelperToolAssembly>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\tools\Apparator.Razor.TagHelpers.dll'))</_RazorTagHelperToolAssembly>
+  </PropertyGroup>
+
+  <UsingTask TaskName="Apparator.Razor.Tasks2.RazorGrovelTagHelpers" AssemblyFile="$(TaskAssembly)" />
+  <UsingTask TaskName="Apparator.Razor.Tasks2.RazorGenerateCode" AssemblyFile="$(TaskAssembly)" />
+
+  <ItemGroup>
+    <RazorTarget Include="Microsoft.AspNetCore.Mvc-2.0.0">
+      <RazorVersion>2.0.0</RazorVersion>
+      <RazorPrimaryAssembly>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\tasks\$(TaskFolder)\Microsoft.AspNetCore.Razor.Language.dll'))</RazorPrimaryAssembly>
+      <RazorSecondaryAssemblies>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\tasks\$(TaskFolder)\Microsoft.AspNetCore.Mvc.Razor.Extensions.dll'))</RazorSecondaryAssemblies>
+    </RazorTarget>
+  </ItemGroup>
+</Project>

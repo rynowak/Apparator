@@ -1,0 +1,39 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFrameworks>netstandard2.0</TargetFrameworks>
+    <PackageOutputPath>$(MSBuildThisFileDirectory)..\..\artifacts\</PackageOutputPath>
+    <NoPackageAnalysis>true</NoPackageAnalysis>
+    <BuildOutputTargetFolder>tasks</BuildOutputTargetFolder>
+    <VersionPrefix>0.1.0</VersionPrefix>
+    <VersionSuffix>build$([System.DateTime]::Now.ToString('yyyyMMdd-HHmm'))</VersionSuffix>
+    <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Content Include="build\*" PackagePath="build\" />
+    <Content Include="buildMultiTargeting\*" PackagePath="buildMultiTargeting\" />
+    <Content Include="*.runtimeconfig.json" PackagePath="tools\" />
+    
+    <Content Include="$(OutputPath)netstandard2.0\Apparator.Razor.CodeGeneration.dll" PackagePath="tools\" />
+    <Content Include="$(OutputPath)netstandard2.0\Apparator.Razor.TagHelpers.dll" PackagePath="tools\" />
+    <Content Include="$(OutputPath)netstandard2.0\Microsoft.AspNetCore.Razor.Language.dll" PackagePath="tools\" />
+    <Content Include="$(OutputPath)netstandard2.0\Microsoft.AspNetCore.Mvc.Razor.Extensions.dll" PackagePath="tools\" />
+    <Content Include="$(OutputPath)netstandard2.0\System.Reflection.Metadata.dll" PackagePath="tools\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Build.Framework" Version="15.1.1012" />
+    <PackageReference Include="Microsoft.Build.Utilities.Core" Version="15.1.1012" />
+    <PackageReference Include="Microsoft.AspNetCore.Razor.Language" Version="2.0.0" />
+    <PackageReference Include="Microsoft.AspNetCore.Mvc.Razor.Extensions" Version="2.0.0" />
+    <PackageReference Include="System.Reflection.Metadata" Version="1.5.0" />
+    
+    <!-- Marks all packages as 'local only' so they don't end up in the nuspec. -->
+    <PackageReference Update="@(PackageReference)" PrivateAssets="All" />
+
+    <ProjectReference Include="..\Apparator.Razor.TagHelpers\Apparator.Razor.TagHelpers.csproj" PrivateAssets="All" />
+    <ProjectReference Include="..\Apparator.Razor.CodeGeneration\Apparator.Razor.CodeGeneration.csproj" PrivateAssets="All" />
+  </ItemGroup>
+
+</Project>
