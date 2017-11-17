@@ -5,6 +5,7 @@ using System;
 using System.IO;
 using System.Reflection.Metadata;
 using System.Reflection.PortableExecutable;
+using Newtonsoft.Json;
 
 namespace Apparator.Razor.TagHelpers
 {
@@ -28,8 +29,6 @@ namespace Apparator.Razor.TagHelpers
 
             foreach (var assembly in Application.Assemblies.Values)
             {
-                Console.WriteLine($"Reading {assembly}");
-
                 using (var stream = File.OpenRead(assembly))
                 {
                     using (var peReader = new PEReader(stream, PEStreamOptions.LeaveOpen))
@@ -54,8 +53,16 @@ namespace Apparator.Razor.TagHelpers
                 }
             }
 
-            Console.WriteLine($"Writing {Path.GetFullPath(Application.OutputDirectory.Value())}");
-            File.WriteAllText(Application.OutputDirectory.Value(), "{ }");
+            var file = Path.GetFullPath(Application.OutputDirectory.Value());
+            if (File.Exists(file))
+            {
+                // Already there
+                return 0;
+            }
+
+            var input = Path.Combine(Path.GetDirectoryName(typeof(RunCommand).Assembly.Location), "defaultTagHelpers.json");
+            Console.WriteLine($"Writing Tag Helpers to: {file}");
+            File.WriteAllText(file, File.ReadAllText(input));
 
             return 0;
         }

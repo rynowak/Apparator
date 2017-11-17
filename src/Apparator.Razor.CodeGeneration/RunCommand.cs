@@ -10,6 +10,8 @@ using System.Reflection.PortableExecutable;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc.Razor.Extensions;
 using Microsoft.AspNetCore.Razor.Language;
+using Microsoft.VisualStudio.LanguageServices.Razor;
+using Newtonsoft.Json;
 
 namespace Apparator.Razor.CodeGeneration
 {
@@ -30,10 +32,14 @@ namespace Apparator.Razor.CodeGeneration
                 Application.ShowHelp();
                 return 1;
             }
+
+            var tagHelpers = GetTagHelpers();
             
             var engine = RazorEngine.Create(b =>
             {
                 RazorExtensions.Register(b);
+
+                b.Features.Add(new Feature() { TagHelpers = tagHelpers,});
             });
 
             var templateEngine = new MvcRazorTemplateEngine(engine, RazorProject.Create(Application.ProjectRoot.Value()));
@@ -58,6 +64,20 @@ namespace Apparator.Razor.CodeGeneration
             }
 
             return success ? 0 : -1;
+        }
+
+        private IReadOnlyList<TagHelperDescriptor> GetTagHelpers()
+        {
+            using (var stream = File.OpenRead(Application.TagHelpers.Value()))
+            {
+                var reader = new JsonTextReader(new StreamReader(stream));
+
+                var serializer = new JsonSerializer();
+                serializer.Converters.Add(new RazorDiagnosticJsonConverter());
+                serializer.Converters.Add(new TagHelperDescriptorJsonConverter());
+
+                return serializer.Deserialize<IReadOnlyList<TagHelperDescriptor>>(reader);
+            }
         }
 
         private List<ViewFileInfo> GetRazorFiles()
@@ -114,6 +134,12 @@ namespace Apparator.Razor.CodeGeneration
                 return false;
             }
 
+            if (string.IsNullOrEmpty(Application.TagHelpers.Value()))
+            {
+                Application.Error.WriteLine($"{Application.TagHelpers.ValueName} not specified.");
+                return false;
+            }
+
             if (Application.Sources.Values.Count == 0)
             {
                 Application.Error.WriteLine($"{Application.Sources.Name} should have at least one value.");
@@ -163,6 +189,15 @@ namespace Apparator.Razor.CodeGeneration
                     bufferSize,
                     FileOptions.Asynchronous | FileOptions.SequentialScan);
             }
+        }
+
+        private class Feature : ITagHelperFeature
+        {
+            public RazorEngine Engine { get; set; }
+
+            public IReadOnlyList<TagHelperDescriptor> TagHelpers { get; set; }
+
+            public IReadOnlyList<TagHelperDescriptor> GetDescriptors() => TagHelpers;
         }
     }
 }

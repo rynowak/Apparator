@@ -17,6 +17,9 @@ namespace Apparator.Razor.Tasks2
         [Required]
         public string OutputPath { get; set; }
 
+        [Required]
+        public string TagHelpers { get; set; }
+
         protected override string GenerateResponseFileCommands()
         {
             var builder = new StringBuilder();
@@ -30,6 +33,9 @@ namespace Apparator.Razor.Tasks2
 
             builder.AppendLine("-o");
             builder.AppendLine(OutputPath);
+
+            builder.AppendLine("-t");
+            builder.AppendLine(TagHelpers);
 
             return builder.ToString();
         }

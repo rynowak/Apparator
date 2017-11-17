@@ -7,7 +7,8 @@
 
   <PropertyGroup>
     <_RazorGeneratedFileDir>$(IntermediateOutputPath)Razor\</_RazorGeneratedFileDir>
-    <_RazorTagHelperCache>$(IntermediateOutputPath)$(TargetName).TagHelper.cache</_RazorTagHelperCache>
+    <_RazorTagHelperInputCache>$(IntermediateOutputPath)$(TargetName).TagHelpers.input.cache</_RazorTagHelperInputCache>
+    <_RazorTagHelperOutputCache>$(IntermediateOutputPath)$(TargetName).TagHelpers.output.cache</_RazorTagHelperOutputCache>
     <_RazorTargetName>$(TargetName).PrecompiledViews</_RazorTargetName>
     <_RazorIntermediateAssembly>$(IntermediateOutputPath)$(_RazorTargetName).dll</_RazorIntermediateAssembly>
     <_RazorIntermediatePdb>$(IntermediateOutputPath)$(_RazorTargetName).pdb</_RazorIntermediatePdb>
@@ -29,14 +30,24 @@
     Name="_RazorResolveTagHelpers"
     DependsOnTargets="_RazorResolveAssemblyReferences;CoreCompile"
     Inputs="$(MSBuildAllProjects);@(_RazorReferencePath)"
-    Outputs="$(_RazorTagHelperCache)">
+    Outputs="$(_RazorTagHelperInputCache)">
+
+    <Message Importance="High" Text="Finding TagHelpers for $(TargetName)" />
+
+    <Touch
+      Files="$(_RazorTagHelperInputCache)"
+      AlwaysCreate="true">
+      <Output
+        TaskParameter="TouchedFiles"
+        ItemName="FileWrites" />
+    </Touch>
 
     <RazorGrovelTaghelpers
       Debug="$(_RazorDebugTagHelperTask)"
       DebugTool="$(_RazorDebugTagHelperTool)"
       ToolAssembly="$(_RazorTagHelperToolAssembly)"
       Assemblies="@(_RazorReferencePath)" 
-      OutputPath="$(_RazorTagHelperCache)">
+      OutputPath="$(_RazorTagHelperOutputCache)">
       <Output 
         TaskParameter="OutputPath" 
         ItemName="FileWrite"/>
@@ -56,8 +67,10 @@
   <Target 
     Name="_RazorGenerateCode" 
     DependsOnTargets="_RazorResolveSourceFiles;_RazorResolveTagHelpers"
-    Inputs="$(MSBuildAllProjects);@(RazorCompile);$(_RazorTagHelperCache)"
+    Inputs="$(MSBuildAllProjects);@(RazorCompile);$(_RazorTagHelperOutputCache)"
     Outputs="@(_RazorGenerated)">
+
+    <Message Importance="High" Text="Generating Razor C# files for $(TargetName)" />
 
     <RemoveDir 
       Directories="$(_RazorGeneratedFileDir)" 
@@ -73,6 +86,7 @@
       ToolAssembly="$(_RazorGenerateCodeAssembly)"
       Sources="@(RazorCompile)"  
       ProjectRoot="$(MSBuildProjectDirectory)" 
+      TagHelpers="$(_RazorTagHelperOutputCache)"
       OutputPath="$(_RazorGeneratedFileDir)" />
 
     <ItemGroup>
@@ -100,6 +114,8 @@
     Outputs="$(_RazorIntermediateAssembly)"
     Returns=""
     DependsOnTargets="_RazorResolveTagHelpers;_RazorGenerateCode">
+
+    <Message Importance="High" Text="Compiling Razor C# files for $(TargetName)"/>
 
     <!-- These two compiler warnings are raised when a reference is bound to a different version
           than specified in the assembly reference version number.  MSBuild raises the same warning in this case,
@@ -189,7 +205,7 @@
         ItemName="FileWrites" />
     </Csc>
 
-    <Message Importance="High" Text="$(_RazorIntermediateAssembly) -> $(OutDir)" />
+    <Message Importance="High" Text="$(_RazorIntermediateAssembly) -> $(OutDir)$(_RazorTargetName)" />
     <Copy 
       SourceFiles="$(_RazorIntermediateAssembly)"
       DestinationFolder="$(OutDir)"

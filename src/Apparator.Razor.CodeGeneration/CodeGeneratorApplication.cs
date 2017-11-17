@@ -22,6 +22,7 @@ namespace Apparator.Razor.CodeGeneration
 
             ProjectRoot = Option("-p", "project root directory", CommandOptionType.SingleValue);
             OutputDirectory = Option("-o", "output directory", CommandOptionType.SingleValue);
+            TagHelpers = Option("-t", "tag helpers file", CommandOptionType.SingleValue);
             Sources = Argument("sources", ".cshtml files to compile", multipleValues: true);
 
             new RunCommand().Configure(this);
@@ -32,6 +33,8 @@ namespace Apparator.Razor.CodeGeneration
         public CommandOption OutputDirectory { get; }
 
         public CommandOption ProjectRoot { get; }
+
+        public CommandOption TagHelpers { get; }
 
         public new int Execute(params string[] args)
         {
