@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <RazorCompileDependsOn>_RazorResolveTagHelpers;_RazorGenerateCode;_RazorCompileCore;$(RazorCompileDependsOn)</RazorCompileDependsOn>
-    <BuildDependsOn>$(BuildDependsOn);RazorCompile</BuildDependsOn>
+    <BuildDependsOn>RazorCompile;$(BuildDependsOn)</BuildDependsOn>
   </PropertyGroup>
 
   <PropertyGroup>
@@ -50,7 +50,7 @@
       OutputPath="$(_RazorTagHelperOutputCache)">
       <Output 
         TaskParameter="OutputPath" 
-        ItemName="FileWrite"/>
+        ItemName="FileWrites"/>
     </RazorGrovelTaghelpers>
 
   </Target>
@@ -204,6 +204,8 @@
         TaskParameter="OutputAssembly" 
         ItemName="FileWrites" />
     </Csc>
+
+    <!-- Output the PDB and COPY of things to FileWrites -->
 
     <Message Importance="High" Text="$(_RazorIntermediateAssembly) -> $(OutDir)$(_RazorTargetName)" />
     <Copy 
