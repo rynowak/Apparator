@@ -20,10 +20,8 @@
     <Content Include="..\Apparator.Razor.CodeGeneration\bin\Debug\netcoreapp2.0\Apparator.Razor.CodeGeneration.deps.json" PackagePath="tools\" />
     <Content Include="$(OutputPath)netcoreapp2.0\Apparator.Razor.TagHelpers.dll" PackagePath="tools\" />
     <Content Include="..\Apparator.Razor.TagHelpers\bin\Debug\netcoreapp2.0\Apparator.Razor.TagHelpers.deps.json" PackagePath="tools\" />
-    <!-- <Content Include="$(OutputPath)netstandard2.0\Microsoft.AspNetCore.Razor.Language.dll" PackagePath="tools\" />
-    <Content Include="$(OutputPath)netstandard2.0\Microsoft.AspNetCore.Mvc.Razor.Extensions.dll" PackagePath="tools\" />
-    <Content Include="$(OutputPath)netstandard2.0\Newtonsoft.Json.dll" PackagePath="tools\" />
-    <Content Include="$(OutputPath)netstandard2.0\System.Reflection.Metadata.dll" PackagePath="tools\" /> -->
+    <Content Include="$(OutputPath)netcoreapp2.0\Apparator.Razor.TagHelpers.Analyzer.dll" PackagePath="analyzer\dotnet\cs" />
+    <Content Include="$(OutputPath)netcoreapp2.0\Microsoft.AspNetCore.Razor.Language.dll" PackagePath="analyzer\dotnet\cs" />
   </ItemGroup>
 
   <ItemGroup>
@@ -36,8 +34,9 @@
     <!-- Marks all packages as 'local only' so they don't end up in the nuspec. -->
     <PackageReference Update="@(PackageReference)" PrivateAssets="All" />
 
-    <ProjectReference Include="..\Apparator.Razor.TagHelpers\Apparator.Razor.TagHelpers.csproj" PrivateAssets="All" />
     <ProjectReference Include="..\Apparator.Razor.CodeGeneration\Apparator.Razor.CodeGeneration.csproj" PrivateAssets="All" />
+    <ProjectReference Include="..\Apparator.Razor.TagHelpers\Apparator.Razor.TagHelpers.csproj" PrivateAssets="All" />
+    <ProjectReference Include="..\Apparator.Razor.TagHelpers.Analyzer\Apparator.Razor.TagHelpers.Analyzer.csproj" PrivateAssets="All" />
   </ItemGroup>
 
 </Project>
