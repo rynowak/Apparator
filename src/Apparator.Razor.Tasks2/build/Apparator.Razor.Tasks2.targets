@@ -7,12 +7,49 @@
 
   <PropertyGroup>
     <_RazorGeneratedFileDir>$(IntermediateOutputPath)Razor\</_RazorGeneratedFileDir>
+    <_RazorAnalyzerManifest>$(IntermediateOutputPath)$(TargetName).TagHelperAnalyzer.txt</_RazorAnalyzerManifest>
     <_RazorTagHelperInputCache>$(IntermediateOutputPath)$(TargetName).TagHelpers.input.cache</_RazorTagHelperInputCache>
     <_RazorTagHelperOutputCache>$(IntermediateOutputPath)$(TargetName).TagHelpers.output.cache</_RazorTagHelperOutputCache>
     <_RazorTargetName>$(TargetName).PrecompiledViews</_RazorTargetName>
     <_RazorIntermediateAssembly>$(IntermediateOutputPath)$(_RazorTargetName).dll</_RazorIntermediateAssembly>
     <_RazorIntermediatePdb>$(IntermediateOutputPath)$(_RazorTargetName).pdb</_RazorIntermediatePdb>
   </PropertyGroup>
+
+  <!-- These targets injects additional data that we want to flow to CSC when the app compiles -->
+  <Target 
+    Name="_RazorWriteAnalyzerManifest"
+    Inputs="$(MSBuildAllProjects)"
+    Outputs="$(_RazorAnalyzerManifest)"
+    Condition="'$(BuildingInsideVisualStudio)'!='true'">
+
+    <PropertyGroup>
+      <_RazorManifestText>$([System.IO.Path]::GetFullPath('$(_RazorTagHelperOutputCache)'))</_RazorManifestText>
+    </PropertyGroup>
+    <Message Importance="High" Text="Writing Manifest $(_RazorManifestText)" />
+
+    <WriteLinesToFile
+      File="$(_RazorAnalyzerManifest)"
+      Lines="$(_RazorManifestText)"
+      Overwrite="true" />
+
+    <ItemGroup>
+      <FileWrites Include="$(_RazorAnalyzerManifest)" />
+    </ItemGroup>
+  </Target>
+
+  <Target 
+    Name="_RazorBeforeCompile" 
+    BeforeTargets="CoreCompile"
+    DependsOnTargets="_RazorWriteAnalyzerManifest"
+    Condition="'$(BuildingInsideVisualStudio)'!='true'">
+
+    <Message Importance="High" Text="Injecting Razor Analyzer" />
+
+    <ItemGroup Condition="'$(BuildingInsideVisualStudio)'!='true'">
+      <Analyzer Include="@(_RazorAnalyzer)" />
+      <AdditionalFiles Include="$(_RazorAnalyzerManifest)" />
+    </ItemGroup>
+  </Target>
 
   <Target Name="RazorCompile" DependsOnTargets="$(RazorCompileDependsOn)">
   </Target>
@@ -30,7 +67,8 @@
     Name="_RazorResolveTagHelpers"
     DependsOnTargets="_RazorResolveAssemblyReferences;CoreCompile"
     Inputs="$(MSBuildAllProjects);@(_RazorReferencePath)"
-    Outputs="$(_RazorTagHelperInputCache)">
+    Outputs="$(_RazorTagHelperInputCache)"
+    Condition="'$(BuildingInsideVisualStudio)'=='true'">
 
     <Message Importance="High" Text="Finding TagHelpers for $(TargetName)" />
 
@@ -66,7 +104,7 @@
 
   <Target 
     Name="_RazorGenerateCode" 
-    DependsOnTargets="_RazorResolveSourceFiles;_RazorResolveTagHelpers"
+    DependsOnTargets="_RazorResolveSourceFiles;_RazorResolveAssemblyReferences;_RazorResolveTagHelpers;CoreCompile"
     Inputs="$(MSBuildAllProjects);@(RazorCompile);$(_RazorTagHelperOutputCache)"
     Outputs="@(_RazorGenerated)">
 
@@ -113,7 +151,7 @@
               
     Outputs="$(_RazorIntermediateAssembly)"
     Returns=""
-    DependsOnTargets="_RazorResolveTagHelpers;_RazorGenerateCode">
+    DependsOnTargets="_RazorResolveAssemblyReferences;CoreCompile;_RazorResolveTagHelpers;_RazorGenerateCode">
 
     <Message Importance="High" Text="Compiling Razor C# files for $(TargetName)"/>
 
